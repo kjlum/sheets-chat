@@ -9,4 +9,4 @@ Began by using the tutorial found [here](https://developers.google.com/sheets/qu
 python -m SimpleHTTPServer 8000
 ```
 
-Open `http://localhost:8000/quickstart.html`
+Open `http://localhost:8000/main.html`
