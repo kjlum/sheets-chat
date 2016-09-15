@@ -1,9 +1,11 @@
 <html>
 	<head>
 		<script type="text/javascript">
-			var CLIENT_ID = '653148226642-92pndfu5fvs2omthe3l7ie4m5giuee6d.apps.googleusercontent.com';
+			var CLIENT_ID = '653148226642-2valqi6sah9a8udgoo9vop024j84m3dj.apps.googleusercontent.com';
 
-			var SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"];
+			var SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
+
+			var SHEET_ID = '1wLW2nUb8bHynMim1aFcUx4-qWZ86wtHttmtYbaWtn9g';
 
 			// Check if current user has authorized this application.
 			function checkAuth() {
@@ -55,15 +57,14 @@
 
 			function listMessages() {
 				gapi.client.sheets.spreadsheets.values.get({
-					spreadsheetId: '1wLW2nUb8bHynMim1aFcUx4-qWZ86wtHttmtYbaWtn9g',
+					spreadsheetId: SHEET_ID,
 					range: 'Chat Data!A2:C',
 				}).then(function(response) {
 					var range = response.result;
 					if (range.values !== null && range.values.length > 0) {
-						appendPre('Sender, Message, Time:');
 						for (i = 0; i < range.values.length; i++) {
 							var row = range.values[i];
-							appendPre(row[0] + ', ' + row[1] + ', ' + row[2]);
+							appendDiv(row[0], row[1], row[2]);
 						}
 					} else {
 						appendPre('No data found.');
@@ -83,9 +84,37 @@
 				pre.appendChild(textContent);
 			}
 
+			function appendDiv(name, msg, time) {
+				var all = document.getElementById('all-messages');
+				var newDiv = document.createElement("div");
+				newDiv.innerHTML = name + ": " + msg;
+				newDiv.className = "message";
+				all.appendChild(newDiv);
+			}
+
+			function appendMessage(name, msg) {
+				var date = new Date();
+				gapi.client.sheets.spreadsheets.values.append({
+					spreadsheetId: SHEET_ID,
+					range: 'Chat Data!A1:C1',
+					majorDimension: "ROWS",
+					values: [
+						[ name, msg, date.getTime() ]
+					],
+					valueInputOption: 'USER_ENTERED'
+				}).then(function(response) {
+					document.getElementById('message-text').value = "";
+				});
+			}
+
+			function sendMessage() {
+				appendMessage("name", document.getElementById('message-text').value);
+			}
+
 		 </script>
 		 <script src="https://apis.google.com/js/client.js?onload=checkAuth">
 		 </script>
+		 <link rel="stylesheet" type="text/css" href="styles.css">
 	</head>
 	<body>
 		<div id="authorize-div" style="display: none">
@@ -95,6 +124,14 @@
 				Authorize
 			</button>
 		</div>
-		<pre id="output"></pre>
+		<div id="messages-wrapper">
+			<div id="all-messages">
+				<pre id="output"></pre>
+			</div>
+			<div id="send-message">
+				<input type="text" name="message" id="message-text">
+				<button onClick="sendMessage()">Send</button>
+			</div>
+		</div>
 	</body>
 </html>
