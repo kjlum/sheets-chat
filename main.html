@@ -23,6 +23,7 @@
 			*/
 			function handleAuthResult(authResult) {
 				var authorizeDiv = document.getElementById('authorize-div');
+				var messages = document.getElementById('messages-wrapper');
 				if (authResult && !authResult.error) {
 					// Hide auth UI, then load client library.
 					authorizeDiv.style.display = 'none';
@@ -56,6 +57,7 @@
 			}
 
 			function listMessages() {
+				var messages = document.getElementById('messages-wrapper');
 				gapi.client.sheets.spreadsheets.values.get({
 					spreadsheetId: SHEET_ID,
 					range: 'Chat Data!A2:C',
@@ -66,10 +68,12 @@
 							var row = range.values[i];
 							appendDiv(row[0], row[1], row[2]);
 						}
+						messages.style.display = 'block';
 					} else {
 						appendPre('No data found.');
 					}
 				}, function(response) {
+					messages.style.display = 'none';
 					appendPre('Error: ' + response.result.error.message);
 				});
 			}
@@ -124,9 +128,9 @@
 				Authorize
 			</button>
 		</div>
-		<div id="messages-wrapper">
+		<pre id="output"></pre>
+		<div id="messages-wrapper" style="display: none">
 			<div id="all-messages">
-				<pre id="output"></pre>
 			</div>
 			<div id="send-message">
 				<input type="text" name="message" id="message-text">
