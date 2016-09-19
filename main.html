@@ -3,9 +3,11 @@
 		<script type="text/javascript">
 			var CLIENT_ID = '653148226642-2valqi6sah9a8udgoo9vop024j84m3dj.apps.googleusercontent.com';
 
-			var SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
+			var SCOPES = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/plus.login", "https://www.googleapis.com/auth/userinfo.profile"];
 
 			var SHEET_ID = '1wLW2nUb8bHynMim1aFcUx4-qWZ86wtHttmtYbaWtn9g';
+
+			var USER_NAME = '';
 
 			// Check if current user has authorized this application.
 			function checkAuth() {
@@ -27,6 +29,7 @@
 				if (authResult && !authResult.error) {
 					// Hide auth UI, then load client library.
 					authorizeDiv.style.display = 'none';
+					getName();
 					loadSheetsApi();
 				} else {
 					// Show auth UI, allowing the user to initiate authorization by clicking authorize button
@@ -76,6 +79,7 @@
 					messages.style.display = 'none';
 					appendPre('Error: ' + response.result.error.message);
 				});
+				getName();
 			}
 
 			/**
@@ -112,7 +116,15 @@
 			}
 
 			function sendMessage() {
-				appendMessage("name", document.getElementById('message-text').value);
+				appendMessage(USER_NAME, document.getElementById('message-text').value);
+			}
+
+			function getName() {
+				gapi.client.load('plus', 'v1', function() {
+					gapi.client.plus.people.get( {'userId' : 'me'} ).execute(function(response) {
+						USER_NAME = response.displayName;
+					});
+				});
 			}
 
 		 </script>
