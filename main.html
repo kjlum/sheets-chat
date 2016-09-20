@@ -159,6 +159,18 @@
 				getNewMessages();
 			}, 10000);
 
+			window.onload = function() {
+				document.getElementById("message-text").addEventListener("keydown", function(event) {
+					if (!event) {
+						var event = window.event;
+					}
+
+					if (event.keyCode == 13) {
+						sendMessage();
+					}
+				}, false);
+			}
+
 		 </script>
 		 <script src="https://apis.google.com/js/client.js?onload=checkAuth">
 		 </script>
