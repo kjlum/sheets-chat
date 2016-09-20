@@ -8,6 +8,8 @@
 			var SHEET_ID = '1wLW2nUb8bHynMim1aFcUx4-qWZ86wtHttmtYbaWtn9g';
 
 			var USER_NAME = '';
+			var LAST_READ = 0;
+			var PADDING = 100;
 
 			// Check if current user has authorized this application.
 			function checkAuth() {
@@ -71,7 +73,11 @@
 							var row = range.values[i];
 							appendDiv(row[0], row[1], row[2]);
 						}
+						LAST_READ = range.values[range.values.length - 1][2];
 						messages.style.display = 'block';
+						var height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || PADDING;
+						messages.style.height = height - PADDING
+						messages.scrollTop = messages.scrollHeight;
 					} else {
 						appendPre('No data found.');
 					}
@@ -112,6 +118,7 @@
 					valueInputOption: 'USER_ENTERED'
 				}).then(function(response) {
 					document.getElementById('message-text').value = "";
+					getNewMessages();
 				});
 			}
 
@@ -126,6 +133,31 @@
 					});
 				});
 			}
+
+			function getNewMessages() {
+				var messages = document.getElementById('messages-wrapper');
+				gapi.client.sheets.spreadsheets.values.get({
+					spreadsheetId: SHEET_ID,
+					range: 'Chat Data!A2:C',
+				}).then(function(response) {
+					var range = response.result;
+					if (range.values !== null && range.values[range.values.length - 1][2] !== LAST_READ && range.values.length > 0) {
+						for (i = 0; i < range.values.length; i++) {
+							var row = range.values[i];
+							if (row[2] > LAST_READ) {
+								appendDiv(row[0], row[1], row[2]);
+							}
+						}
+						LAST_READ = range.values[range.values.length - 1][2];
+						messages.style.display = 'block';
+						messages.scrollTop = messages.scrollHeight;
+					}
+				});
+			}
+
+			setInterval(function() {
+				getNewMessages();
+			}, 10000);
 
 		 </script>
 		 <script src="https://apis.google.com/js/client.js?onload=checkAuth">
@@ -144,10 +176,10 @@
 		<div id="messages-wrapper" style="display: none">
 			<div id="all-messages">
 			</div>
-			<div id="send-message">
-				<input type="text" name="message" id="message-text">
-				<button onClick="sendMessage()">Send</button>
-			</div>
+		</div>
+		<div id="send-message">
+			<input type="text" name="message" id="message-text">
+			<button onClick="sendMessage()">Send</button>
 		</div>
 	</body>
 </html>
